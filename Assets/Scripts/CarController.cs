@@ -64,9 +64,9 @@ public class CarController : MonoBehaviour
 
     private void HandleSteering()
     {
-        currentSteerAngle = maxSteerAngle * horizontalInput;
+       // currentSteerAngle = maxSteerAngle * horizontalInput;
         frontLeftWheelCollider.steerAngle = currentSteerAngle;
-      frontRightWheelCollider.steerAngle = currentSteerAngle;
+        frontRightWheelCollider.steerAngle = currentSteerAngle;
     }
 
     private void UpdateWheels()
@@ -84,5 +84,19 @@ public class CarController : MonoBehaviour
         wheelCollider.GetWorldPose(out pos, out rot);
         wheelTransform.rotation = rot;
         wheelTransform.position = pos;
+    }
+
+
+    Rigidbody rb;
+    void Start()
+    {
+         rb = GetComponent<Rigidbody>();
+    }
+
+    private void Update()
+    {
+        if ( rb.velocity.z <= -20f) {
+            rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y , -20f);
+        }
     }
 }
