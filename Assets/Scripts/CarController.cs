@@ -8,11 +8,14 @@ public class CarController : MonoBehaviour
     private const string HORIZONTAL = "Horizontal";
     private const string VERTICAL = "Vertical";
 
+    public float maxSpeed = -15f;
     private float horizontalInput;
     private float verticalInput;
     private float currentSteerAngle;
     private float currentbreakForce;
+
     private bool isBreaking;
+    private bool isBoost;
 
     [SerializeField] private float motorForce;
     [SerializeField] private float breakForce;
@@ -28,15 +31,55 @@ public class CarController : MonoBehaviour
     [SerializeField] private Transform rearLeftWheelTransform;
     [SerializeField] private Transform rearRightWheelTransform;
 
-    private void FixedUpdate()
+    Rigidbody rb;
+    void Start()
     {
-        GetInput();
-        HandleMotor();
-        HandleSteering();
-        UpdateWheels();
+        isBoost = false;
+        rb = GetComponent<Rigidbody>();
     }
 
+    private void FixedUpdate()
+    {
+        frontLeftWheelCollider.motorTorque =  motorForce;
+        frontRightWheelCollider.motorTorque =  motorForce;
+        rearLeftWheelCollider.motorTorque = motorForce;
+        rearRightWheelCollider.motorTorque = motorForce;
+        currentbreakForce = isBreaking ? breakForce : 0f;
+        ApplyBreaking();
 
+        if (rb.velocity.magnitude < maxSpeed)
+        {
+            rb.velocity = Vector3.ClampMagnitude(rb.velocity, maxSpeed);
+        }
+
+        GetInput();
+       // HandleMotor();
+        HandleSteering();
+        UpdateWheels();
+
+        //if (rb.velocity.z <= -15f)
+        //{
+        //    rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y, speed);
+        //}
+      
+
+        if (!isBreaking && rb.velocity.z > -4f)
+        {
+            TurboBoost();
+        }
+    }
+    
+   public void Boosting()
+    {
+        StartCoroutine(Boost2());
+
+        //if (isBoost == true)
+        //{
+        //    rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y, rb.velocity.z * 2f);
+        //    //Vector3
+        //    //rb.velocity( rb.velocity.x, rb.velocity.y, rb.velocity.z *2f);
+        //}
+    }
     private void GetInput()
     {
         horizontalInput = Input.GetAxis(HORIZONTAL);
@@ -50,16 +93,18 @@ public class CarController : MonoBehaviour
         frontRightWheelCollider.motorTorque = verticalInput * motorForce;
         rearLeftWheelCollider.motorTorque = verticalInput * motorForce;
         rearRightWheelCollider.motorTorque = verticalInput * motorForce;
+
         currentbreakForce = isBreaking ? breakForce : 0f;
         ApplyBreaking();
     }
 
     private void ApplyBreaking()
     {
-       frontRightWheelCollider.brakeTorque = currentbreakForce;
+        frontRightWheelCollider.brakeTorque = currentbreakForce;
         frontLeftWheelCollider.brakeTorque = currentbreakForce;
         rearLeftWheelCollider.brakeTorque = currentbreakForce;
-      rearRightWheelCollider.brakeTorque = currentbreakForce;
+        rearRightWheelCollider.brakeTorque = currentbreakForce;
+       
     }
 
     private void HandleSteering()
@@ -86,17 +131,26 @@ public class CarController : MonoBehaviour
         wheelTransform.position = pos;
     }
 
-
-    Rigidbody rb;
-    void Start()
+    public void TurboBoost()
     {
-         rb = GetComponent<Rigidbody>();
+        StartCoroutine(Boost());
     }
 
-    private void Update()
+    IEnumerator Boost()
     {
-        if ( rb.velocity.z <= -20f) {
-            rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y , -20f);
-        }
+        isBoost = true;
+        motorForce = 500f;
+
+        yield return new WaitForSeconds(2f);
+        motorForce = 100f;
+        isBoost = false;
+    }
+    IEnumerator Boost2()
+    {
+        rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y, rb.velocity.z * 2f);
+        // button deaktif
+        yield return new WaitForSeconds(2f);
+        rb.velocity = new Vector3(rb.velocity.x, rb.velocity.y, -15f);
+        // button aktif
     }
 }
