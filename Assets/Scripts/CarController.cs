@@ -30,8 +30,15 @@ public class CarController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        frontLeftWheelCollider.motorTorque = motorForce;
+        frontRightWheelCollider.motorTorque = motorForce;
+        rearLeftWheelCollider.motorTorque = motorForce;
+        rearRightWheelCollider.motorTorque = motorForce;
+        currentbreakForce = isBreaking ? breakForce : 0f;
+        ApplyBreaking();
+
         GetInput();
-        HandleMotor();
+        //HandleMotor();
         HandleSteering();
         UpdateWheels();
     }

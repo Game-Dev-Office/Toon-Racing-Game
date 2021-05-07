@@ -10,8 +10,5 @@ public class RotationFixer : MonoBehaviour
         Rigidbody rb = GetComponent<Rigidbody>();
         rb.centerOfMass = Vector3.zero;
         rb.inertiaTensorRotation = Quaternion.identity;
-
     }
-
-   
 }
